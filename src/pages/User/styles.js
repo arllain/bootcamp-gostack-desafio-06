@@ -65,16 +65,15 @@ export const Title = styled.Text`
   color: #333;
 `;
 
-// export const Title = styled.Text.attrs({
-//   numberOfLines: 1,
-// })`
-//   font-size: 15px;
-//   font-weight: bold;
-//   color: #333;
-// `;
-
 export const Author = styled.Text`
   font-size: 13px;
   color: #666;
   margin-top: 2px;
+`;
+
+export const LoadingIndicator = styled.View`
+  flex: 1;
+  justify-content: center;
+  flex-direction: row;
+  background: #e6e3e4;
 `;
