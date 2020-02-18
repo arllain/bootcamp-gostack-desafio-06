@@ -11,7 +11,7 @@ const Routes = createAppContainer(
     },
     {
       headerLayoutPreset: 'center',
-      headerBackTitleVisible: false,
+      //headerBackTitleVisible: false,
       //headerTitleAlign: 'center',
       defaultNavigationOptions: {
         //headerBackTitleVisible: false,
