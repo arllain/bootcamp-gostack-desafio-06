@@ -15,7 +15,7 @@ import {
   Info,
   Title,
   Author,
-  LoadingIndicator,
+  Loading,
 } from './styles';
 
 export default class User extends Component {
@@ -31,47 +31,53 @@ export default class User extends Component {
 
   state = {
     stars: [],
-    loading: false,
     page: 1,
+    loading: true,
+    refreshing: false,
   };
 
-  componentDidMount() {
+  async componentDidMount() {
     this.loadRepositories();
   }
 
-  loadRepositories = async () => {
-    if (this.state.loading) return;
-
+  loadRepositories = async (page = 1) => {
+    const { stars, endOfList } = this.state;
     const { navigation } = this.props;
     const user = navigation.getParam('user');
-    const { page } = this.state;
-    this.setState({ loading: true });
 
-    const response = await api.get(`/users/${user.login}/starred?page=${page}`);
-
-    if (response) {
-    }
+    const response = await api.get(`/users/${user.login}/starred`, {
+      params: { page },
+    });
 
     this.setState({
-      stars: [...this.state.stars, ...response.data],
+      stars: page >= 2 ? [...stars, ...response.data] : response.data,
+      page,
       loading: false,
-      page: page + 1,
+      refreshing: false,
     });
+  };
+
+  loadMore = () => {
+    this.setState({ loading: true });
+    const { page } = this.state;
+    const nextPage = page + 1;
+    this.loadRepositories(nextPage);
+  };
+
+  refreshList = () => {
+    this.setState({ refreshing: true, stars: [] }, this.loadRepositories);
   };
 
   renderFooter = () => {
     if (!this.state.loading) return null;
-    return (
-      <LoadingIndicator>
-        <ActivityIndicator size="large" color="#7159c1" />
-      </LoadingIndicator>
-    );
+    return <Loading />;
   };
 
   render() {
     const { navigation } = this.props;
-    const { stars, loading } = this.state;
+    const { stars, loading, refreshing } = this.state;
     const user = navigation.getParam('user');
+
     return (
       <Container>
         <Header>
@@ -80,9 +86,11 @@ export default class User extends Component {
           <Bio>{user.bio}</Bio>
         </Header>
         <Stars
-          onEndReached={this.loadRepositories} // Função que carrega mais itens
-          onEndReachedThreshold={0.2} // Carrega mais itens quando chegar em 20% do fim
           data={stars}
+          onRefresh={this.refreshList}
+          refreshing={refreshing}
+          onEndReachedThreshold={0.2}
+          onEndReached={this.loadMore}
           keyExtractor={star => String(star.id)}
           renderItem={({ item }) => (
             <Starred>

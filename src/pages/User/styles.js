@@ -71,8 +71,7 @@ export const Author = styled.Text`
   margin-top: 2px;
 `;
 
-export const LoadingIndicator = styled.View`
-  flex: 1;
-  justify-content: center;
-  flex-direction: row;
-`;
+export const Loading = styled.ActivityIndicator.attrs({
+  color: '#7159c1',
+  size: 50,
+})``;
