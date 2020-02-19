@@ -32,19 +32,41 @@ export default class User extends Component {
   state = {
     stars: [],
     loading: false,
+    page: 1,
   };
 
-  async componentDidMount() {
+  componentDidMount() {
+    this.loadRepositories();
+  }
+
+  loadRepositories = async () => {
+    if (this.state.loading) return;
+
     const { navigation } = this.props;
-
     const user = navigation.getParam('user');
-
+    const { page } = this.state;
     this.setState({ loading: true });
 
-    const response = await api.get(`/users/${user.login}/starred`);
+    const response = await api.get(`/users/${user.login}/starred?page=${page}`);
 
-    this.setState({ stars: response.data, loading: false });
-  }
+    if (response) {
+    }
+
+    this.setState({
+      stars: [...this.state.stars, ...response.data],
+      loading: false,
+      page: page + 1,
+    });
+  };
+
+  renderFooter = () => {
+    if (!this.state.loading) return null;
+    return (
+      <LoadingIndicator>
+        <ActivityIndicator size="large" color="#7159c1" />
+      </LoadingIndicator>
+    );
+  };
 
   render() {
     const { navigation } = this.props;
@@ -57,25 +79,22 @@ export default class User extends Component {
           <Name>{user.name}</Name>
           <Bio>{user.bio}</Bio>
         </Header>
-        {loading ? (
-          <LoadingIndicator>
-            <ActivityIndicator size="large" color="#7159c1" />
-          </LoadingIndicator>
-        ) : (
-          <Stars
-            data={stars}
-            keyExtractor={star => String(star.id)}
-            renderItem={({ item }) => (
-              <Starred>
-                <OwnerAvatar source={{ uri: item.owner.avatar_url }} />
-                <Info>
-                  <Title>{item.name}</Title>
-                  <Author>{item.owner.login}</Author>
-                </Info>
-              </Starred>
-            )}
-          />
-        )}
+        <Stars
+          onEndReached={this.loadRepositories} // Função que carrega mais itens
+          onEndReachedThreshold={0.2} // Carrega mais itens quando chegar em 20% do fim
+          data={stars}
+          keyExtractor={star => String(star.id)}
+          renderItem={({ item }) => (
+            <Starred>
+              <OwnerAvatar source={{ uri: item.owner.avatar_url }} />
+              <Info>
+                <Title>{item.name}</Title>
+                <Author>{item.owner.login}</Author>
+              </Info>
+            </Starred>
+          )}
+          ListFooterComponent={this.renderFooter}
+        />
       </Container>
     );
   }

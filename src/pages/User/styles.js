@@ -75,5 +75,4 @@ export const LoadingIndicator = styled.View`
   flex: 1;
   justify-content: center;
   flex-direction: row;
-  background: #e6e3e4;
 `;
